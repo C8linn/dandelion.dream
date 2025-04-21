@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js"></script>
+    <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="30">
+   
+    <title>Take a Moment</title>
+   
+    <style>
+      body {
+        margin: 0;
+        background-color: black;
+        cursor: none;
+        height: 100vh;
+        overflow: hidden;
+      }
+  
+      .fluff {
+        position: absolute;
+        color: white;
+        pointer-events: none;
+        opacity: 1;
+        animation: float 6s ease-in forwards;
+        z-index: 9999;
+        will-change: transform, opacity;
+      }
+  
+      @keyframes float {
+        0% {
+          opacity: 1;
+          transform: translate(0, 0) rotate(0deg) scale(var(--scale));
+        }
+        25% {
+          transform: translate(var(--x-drift), 25vh) rotate(10deg) scale(calc(var(--scale) * 0.95));
+        }
+        50% {
+          transform: translate(calc(var(--x-drift) * -1), 50vh) rotate(-10deg) scale(calc(var(--scale) * 0.85));
+        }
+        75% {
+          transform: translate(var(--x-drift), 75vh) rotate(10deg) scale(calc(var(--scale) * 0.75));
+        }
+        100% {
+          opacity: 0;
+          transform: translate(0, 100vh) rotate(360deg) scale(calc(var(--scale) * 0.6));
+        }
+      }
+  
+      .cursor-fluff {
+        position: absolute;
+        font-size: 20px;
+        color: white;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        z-index: 10000;
+      }
+    </style>
+    
+    <style>
+
+    /* Clock positioned inside the container */
+    #clock-container {
+      position: absolute;
+      top: 675px;
+      left: 1000px;
+      white-space: pre;
+      font-size: 15px;
+      line-height: 1.2;
+      color: white;
+    }
+  </style>
+ 
+  </head>
+  <body>
+
+    <div id="background">
+      <div id="clock-container">
+  +------------------+
+  |   12:34:56 PM    |
+  +------------------+
+      </div>
+    </div>
+  
+    <script>
+      function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+  
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        hours = String(hours).padStart(2, '0');
+  
+        const timeStr = `${hours}:${minutes}:${seconds} ${ampm}`;
+        const line = `|   ${timeStr}   |`;
+  
+        const clockBox = [
+          '+------------------+',
+          line,
+          '+------------------+'
+        ].join('\n');
+  
+        document.getElementById('clock-container').textContent = clockBox;
+      }
+  
+      setInterval(updateClock, 1000);
+      updateClock();
+    </script>
+
+<div id="cursor" class="cursor-fluff">⁕</div>
+
+<script>
+  const fluffChars = ['~', '·', '°', '❃', '❋', '⁕'];
+  const cursor = document.getElementById('cursor');
+
+  // Move fake cursor
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = `${e.pageX}px`;
+    cursor.style.top = `${e.pageY}px`;
+    createFluff(e.pageX, e.pageY, 1); // One small fluff per move
+  });
+
+  // Burst on click
+  document.addEventListener('click', (e) => {
+    createFluff(e.pageX, e.pageY, 8); // Burst of 8
+  });
+
+  function createFluff(x, y, count) {
+    for (let i = 0; i < count; i++) {
+      const fluff = document.createElement('div');
+      fluff.className = 'fluff';
+      fluff.textContent = fluffChars[Math.floor(Math.random() * fluffChars.length)];
+      fluff.style.left = `${x}px`;
+      fluff.style.top = `${y}px`;
+
+      // Random drift and scale
+      const drift = (Math.random() * 100 - 50).toFixed(0) + 'px';
+      const scale = (Math.random() * 0.7 + 0.5).toFixed(2); // between 0.5 and 1.2
+
+      fluff.style.setProperty('--x-drift', drift);
+      fluff.style.setProperty('--scale', scale);
+      fluff.style.fontSize = `${16 * scale}px`;
+
+      document.body.appendChild(fluff);
+      setTimeout(() => fluff.remove(), 6000);
+    }
+  }
+</script>
+
+    
+    <script src="sketch.js"></script>
+    <script src="letter.js"></script>
+  </body>
+</html>
